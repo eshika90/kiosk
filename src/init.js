@@ -1,28 +1,23 @@
 import dotenv from 'dotenv';
 import Http from 'node:http';
+import { ExpressApp } from './app.js';
+
 dotenv.config();
 
-import express from 'express';
-
-export class ExpressApp {
-  app = express();
+export class Server {
+  expressApp = new ExpressApp();
   httpServer;
 
   constructor() {
-    this.setAppsettings();
-    this.setAppRouter();
-    this.httpServer = new Http.Server();
+    this.httpServer = new Http.Server(this.expressApp.app);
   }
 
-  setAppsettings = () => {
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: false }));
-  };
+  //   databaseConnection = () => {
+  //     return this.sequelize.authenticate() // 현재 쿼리문으로 생성 중
+  //   };
 
-  setAppRouter = () => {
-    this.app.use('/api', (req, res, next) => {
-      return res.status(200), json('hello');
-    });
+  sequelizeSync = () => {
+    return this.sequelize.sync({ force: false });
   };
 
   runServer = () => {
@@ -33,15 +28,18 @@ export class ExpressApp {
       return this.serverErrorHandler(e);
     }
   };
+
   serverListen = () => {
+    console.log(process.env.HOST);
     const { PORT: port, HOST: host } = process.env;
     return this.httpServer.listen(port, () => {
       console.log(`Server is Running on http://${host}:${port}`);
     });
   };
+
   serverErrorHandler = (error) => {
     console.log('Server run error: ', error.message);
   };
 }
-const expressApp = new ExpressApp();
-expressApp.runServer();
+const server = new Server();
+server.runServer();
