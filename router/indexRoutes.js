@@ -1,8 +1,7 @@
-const router = require('express').Router();
-const itemRouter = require('./itemRoutes');
-const ItemController = require('../controller/itemController');
-const itemController = ItemController();
+import express from 'express';
+const router = express.Router();
+import itemRouter from './itemRoutes.js';
 
-router.use('/api/item', itemRouter);
+router.use('/', itemRouter);
 
-module.exports = router;
+export default router;

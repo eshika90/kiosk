@@ -1,8 +1,16 @@
-const ItemRepository = require('../repository/itemRepository');
+import ItemRepository from '../repository/itemRepository.js';
 
 class ItemService {
-  itemRepository = ItemRepository();
-  addItem = () => {};
+  itemRepository = new ItemRepository();
+
+  addItem = async (name, price, type, amount) => {
+    try {
+      return await this.itemRepository.addItem(name, price, type, amount);
+    } catch (e) {
+      console.error(e);
+      throw error;
+    }
+  };
 }
 
-module.exports = ItemService;
+export default ItemService;
