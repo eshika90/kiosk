@@ -45,7 +45,6 @@ class ExpressApp {
     try {
       this.dbConnection = await mysql.createConnection(databaseConnection);
       console.log(`${databaseConnection.database}로 연결되었습니다.`);
-      console.log(dbConnection);
     } catch (e) {
       console.error('Error: ', e);
     }
@@ -67,13 +66,13 @@ class ExpressApp {
     }
   };
 }
+
+const expressApp = new ExpressApp();
+expressApp.runServer();
+expressApp.setAppRouter();
+
+export default expressApp;
 // 프로그램이 종료되면 데이터베이스 연결도 종료
 process.on('exit', () => {
   expressApp.closeDatabaseconnection();
 });
-
-export default ExpressApp;
-export const expressApp = new ExpressApp();
-export const dbConnection = expressApp.dbConnection;
-expressApp.runServer();
-expressApp.setAppRouter();
