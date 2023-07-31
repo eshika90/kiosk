@@ -5,6 +5,7 @@ dotenv.config();
 import express from 'express';
 import mysql from 'mysql2/promise';
 import itemRouter from './router/itemRoutes.js';
+import bodyParser from 'body-parser';
 
 export const databaseConnection = {
   host: process.env.DB_HOST,
@@ -18,6 +19,8 @@ class ExpressApp {
   dbConnection;
   setAppsettings = () => {
     this.app.use(express.json());
+    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.urlencoded({ extended: false }));
   };
 
   setAppRouter = () => {

@@ -11,6 +11,44 @@ class ItemService {
       throw error;
     }
   };
+  getItem = async () => {
+    try {
+      return await this.itemRepository.getItem();
+    } catch (e) {
+      console.error(e);
+      throw error;
+    }
+  };
+  getTypeItem = async (type) => {
+    try {
+      return await this.itemRepository.getTypeItem(type);
+    } catch (e) {
+      console.error(e);
+      throw error;
+    }
+  };
+  modifyItem = async (name, price, type, amount, id) => {
+    try {
+      return await this.itemRepository.modifyItem(
+        name,
+        price,
+        type,
+        amount,
+        id
+      );
+    } catch (e) {
+      console.error(e);
+      throw error;
+    }
+  };
+  deleteItem = async (id) => {
+    try {
+      await this.itemRepository.deleteItem(id);
+    } catch (e) {
+      console.error(e);
+      throw error;
+    }
+  };
 }
 
 export default ItemService;
