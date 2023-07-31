@@ -5,6 +5,7 @@ dotenv.config();
 import express from 'express';
 import mysql from 'mysql2/promise';
 import itemRouter from './router/itemRoutes.js';
+import placeOrderRouter from './router/placeOrderRoutes.js';
 import bodyParser from 'body-parser';
 
 export const databaseConnection = {
@@ -24,7 +25,7 @@ class ExpressApp {
   };
 
   setAppRouter = () => {
-    this.app.use('/api', itemRouter),
+    this.app.use('/api', [itemRouter], [placeOrderRouter]),
       //에러 핸들링 미들웨어
       this.app.use((error, request, response, next) => {
         response.status(400).json({
