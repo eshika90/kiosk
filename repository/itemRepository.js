@@ -22,7 +22,7 @@ class ItemRepository {
   };
   getTypeItem = async (type) => {
     try {
-      const sql = 'SELECT * FROM item where type=?';
+      const sql = 'SELECT * FROM item where type=? ORDER BY id ASC'; // id기준으로 내림차순으로 정렬
       const typeAllItems = await expressApp.dbConnection.query(sql, [type]);
       return typeAllItems[0];
     } catch (error) {

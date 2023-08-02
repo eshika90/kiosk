@@ -18,8 +18,17 @@ class PlaceOrderController {
     const { state } = req.body;
     const { id } = req.params;
     try {
-      await this.placeOrderService.updateState(state, id);
-      return res.status(200).json({ message: '메뉴 발주 성공' });
+      const result = await this.placeOrderService.updateState(state, id);
+      if (result == '취소 불가') {
+        return res.status(400).json({
+          message: '현재 수량이 발주 수량보다 적어 발주 취소가 불가능합니다.',
+        });
+      }
+      if (result == '발주취소') {
+        return res.status(200).json({ message: '메뉴 발주를 취소하였습니다.' });
+      } else {
+        return res.status(200).json({ message: '메뉴 발주 성공' });
+      }
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: '메뉴 발주에 실패하였습니다.' });

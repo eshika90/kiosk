@@ -20,14 +20,11 @@ class PlaceOrderService {
         return await this.placeOrderRepository.completeOrder(state, id);
       }
       if (state == 3) {
-        const orderAmount = await this.placeOrderRepository.getOrder(id);
-        const recentAmount = await this.itemRepository.getAmount(id);
-        if (orderAmount > recentAmount) {
-          return res.status(400).json({
-            message: '현재 수량이 발주 수량보다 적어 발주 취소가 불가능합니다.',
-          });
+        const getAmount = await this.placeOrderRepository.getOrder(id);
+        if (getAmount[0] < getAmount[1]) {
+          return '취소 불가';
         } else {
-          return await this.placeOrderRepository.cancelOrder(id);
+          return await this.placeOrderRepository.cancelOrder(state, id);
         }
       }
       return await this.placeOrderRepository.updateState(state, id);
