@@ -1,6 +1,19 @@
+import { DatabaseConnection } from '../db.js';
+
 export class ItemsRepository {
-  getItems = () => {
-    const allItems = '테스트용으로 일단 씀';
-    return allItems;
-  };
+  connection;
+
+  constructor() {
+    this.connection = new DatabaseConnection().getConnection();
+  }
+
+  async getItems() {
+    try {
+      const [allItems, fields] = await this.connection.execute('SELECT * FROM item');
+      return allItems;
+    } catch (error) {
+      console.error('Error executing query:', error.message);
+      throw error;
+    }
+  }
 }
