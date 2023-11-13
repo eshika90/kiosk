@@ -1,39 +1,29 @@
+// import './db.js';
 import dotenv from 'dotenv';
-import Http from 'node:http';
+import Http from 'http'; // 기본 node.js 라이브러리
 import { ExpressApp } from './app.js';
 
 dotenv.config();
 
 export class Server {
   expressApp = new ExpressApp();
-  httpServer;
+  httpServer; // javascript에서는 안 써도 되지만 선언을 typescript에서 미리 해놓고 사용하기 때문에 조호영튜터님은 선언을 하는것을 선호함
 
   constructor() {
-    this.httpServer = new Http.Server(this.expressApp.app);
+    this.httpServer = new Http.Server(this.expressApp.app); // app을 http서버로 실행시킴
   }
-
-  //   databaseConnection = () => {
-  //     return this.sequelize.authenticate() // 현재 쿼리문으로 생성 중
-  //   };
-
-  sequelizeSync = () => {
-    return this.sequelize.sync({ force: false });
-  };
 
   runServer = () => {
     try {
-      // await this.databaseConnection()
       return this.serverListen();
     } catch (e) {
       return this.serverErrorHandler(e);
     }
   };
-
   serverListen = () => {
-    console.log(process.env.HOST);
     const { PORT: port, HOST: host } = process.env;
     return this.httpServer.listen(port, () => {
-      console.log(`Server is Running on http://${host}:${port}`);
+      console.log(`Server is running on: http://${host}:${port}`);
     });
   };
 
@@ -41,5 +31,6 @@ export class Server {
     console.log('Server run error: ', error.message);
   };
 }
+
 const server = new Server();
 server.runServer();
