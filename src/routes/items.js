@@ -5,5 +5,8 @@ const router = Router();
 const itemsController = new ItemsController();
 
 router.get('/', itemsController.getItems);
+router.get('/:id', itemsController.getItemById);
+router.get('/types', itemsController.getTypeItems);
+router.post('/', itemsController.createItem);
 
 export default router;
