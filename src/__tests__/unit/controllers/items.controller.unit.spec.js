@@ -1,4 +1,4 @@
-import { ItemsController } from '../../controller/items.controller.js';
+import { ItemsController } from '../../../controller/items.controller.js';
 
 let mockItemsService = {
   createItem: jest.fn(),
@@ -26,7 +26,7 @@ describe('ItemsController Unit Test', () => {
     });
   });
 
-  test('Items Controller createItem Method by Success', async () => {
+  test('createItem test', async () => {
     const createItemRequestBody = {
       name: '아메리카노',
       price: 3500,
@@ -70,5 +70,24 @@ describe('ItemsController Unit Test', () => {
     expect(mockResponse.json).toHaveBeenCalledWith({
       data: createItemReturnValue,
     });
+  });
+
+  test('getItems test', async () => {
+    const allItemsReturnValue = [
+      {
+        id: 2,
+        nickname: 'Nickname_2',
+        title: 'Title_2',
+        createdAt: new Date('07 October 2011 15:50 UTC'),
+        updatedAt: new Date('07 October 2011 15:50 UTC'),
+      },
+      {
+        id: 1,
+        nickname: 'Nickname_1',
+        title: 'Title_1',
+        createdAt: new Date('06 October 2011 15:50 UTC'),
+        updatedAt: new Date('06 October 2011 15:50 UTC'),
+      },
+    ];
   });
 });
