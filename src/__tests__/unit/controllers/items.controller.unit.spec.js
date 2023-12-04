@@ -26,11 +26,11 @@ describe('ItemsController Unit Test', () => {
     });
   });
 
-  test('createItem test', async () => {
+  test('createItem test : Success', async () => {
     const createItemRequestBody = {
       name: '아메리카노',
       price: 3500,
-      type: 'coffee',
+      type: 'COFFEE',
     };
 
     mockRequest.body = createItemRequestBody;
@@ -70,6 +70,21 @@ describe('ItemsController Unit Test', () => {
     expect(mockResponse.json).toHaveBeenCalledWith({
       data: createItemReturnValue,
     });
+  });
+
+  test('createItem test : Success', async () => {
+    const createItemErrorName = {
+      price: 3500,
+      type: 'COFFEE',
+    };
+    const createItemErrorPrice = {
+      name: '아메리카노',
+      type: 'COFFEE',
+    };
+    const createItemErrorType = {
+      name: '아메리카노',
+      price: '3500',
+    };
   });
 
   test('getItems test', async () => {
