@@ -7,25 +7,64 @@ export class ItemsRepository {
     this.connection = new DatabaseConnection().getConnection();
   }
 
-  async getItems() {
-    try {
-      const [allItems, fields] = await this.connection.execute(
-        'SELECT * FROM item',
-      );
-      return allItems;
-    } catch (error) {
-      console.error('Error executing query:', error.message);
-      throw error;
-    }
-  }
+  getItems = async () => {
+    const [allItems] = await this.connection.execute('SELECT * FROM item');
+    return allItems;
+  };
 
-  async createItem(name, price, type) {
-    await this.connection.execute(
-      `INSERT INTO item (name, price, type) VALUES (${name}, ${price}, ${type}`,
+  getItemById = id => {
+    const [findByIdItem] = this.connection.execute(
+      'SELECT * FROM item WHERE id = ?',
+      [id],
     );
-    const createdItem = await this.connection.execute(
-      'SELECT LAST_INSERT_ID()',
+    return findByIdItem;
+  };
+
+  getItemByName = async name => {
+    const [findByNameItem] = await this.connection.execute(
+      'SELECT * FROM item WHERE name = ?',
+      [name],
+    );
+    return findByNameItem;
+  };
+
+  getTypeItems = async type => {
+    const [findByTypeItems] = await this.connection.execute(
+      'SELECT * FROM item WHERE `type` = ?',
+      [type],
+    );
+    return findByTypeItems;
+  };
+
+  createItem = async (name, price, type) => {
+    const [createdItem] = await this.connection.execute(
+      'INSERT INTO item (name, price, type) VALUES (?, ?, ?)',
+      [name, price, type],
     );
     return createdItem;
-  }
+  };
+
+  updateItem = async (name, price, type) => {
+    const [updatedItem] = await this.connection.execute(
+      'UPDATE item SET name = ?, price = ?, type = ? WHERE name = ?',
+      [name, price, type, name],
+    );
+    if (updatedItem.affectedRows === 0) {
+      throw new Error('찾을 수 없는 메뉴입니다.');
+    } else {
+      return true;
+    }
+  };
+
+  deleteItem = async name => {
+    const [deletedItem] = await this.connection.execute(
+      'DELETE FROM item WHERE name = ?',
+      [name],
+    );
+    if (deletedItem.affectedRows === 0) {
+      throw new Error('찾을 수 없는 메뉴입니다.');
+    } else {
+      return true;
+    }
+  };
 }
