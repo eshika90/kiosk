@@ -36,7 +36,7 @@ describe('ItemsController Unit Test', () => {
     mockRequest.body = createItemRequestBody;
 
     const createItemReturnValue = {
-      id: 1,
+      insertId: undefined,
       name: createItemRequestBody.name,
       price: createItemRequestBody.price,
       type: createItemRequestBody.type,
@@ -44,6 +44,7 @@ describe('ItemsController Unit Test', () => {
       updated_at: new Date().toString(),
     };
 
+    // service의 return 값을 입력한 변수에 할당
     mockItemsService.createItem = jest.fn(() => createItemReturnValue);
 
     // 실행됨
@@ -68,11 +69,16 @@ describe('ItemsController Unit Test', () => {
 
     // 3.
     expect(mockResponse.json).toHaveBeenCalledWith({
-      data: createItemReturnValue,
+      Message: `${createItemReturnValue.id}번으로 메뉴가 생성되었습니다.`,
     });
   });
 
-  test('createItem test : Success', async () => {
+  test('createItem test : Fail', async () => {
+    // 아이템 생성 시 name, price, type 하나라도 없으면 실패
+    const createNothing = {};
+    const createOne = {
+      price: 3500,
+    };
     const createItemErrorName = {
       price: 3500,
       type: 'COFFEE',
@@ -85,24 +91,48 @@ describe('ItemsController Unit Test', () => {
       name: '아메리카노',
       price: '3500',
     };
+    const errorBodies = [
+      createNothing,
+      createOne,
+      createItemErrorName,
+      createItemErrorPrice,
+      createItemErrorType,
+    ];
+    for (const errorBody of errorBodies) {
+      mockRequest.body = errorBody;
+
+      mockResponse.status = jest.fn(() => mockResponse);
+
+      await itemsController.createItem(mockRequest, mockResponse);
+      // res.status는 1번 호출되고, 400번의 http status code가 호출
+      expect(mockResponse.status).toHaveBeenCalledTimes(1);
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      // response의 결과값이 json타입으로 오는지 확인
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        errorMessage: expect.any(String),
+      });
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        errorMessage: 'name, price, type은 필수로 입력해야 합니다.',
+      });
+    }
   });
 
-  test('getItems test', async () => {
-    const allItemsReturnValue = [
-      {
-        id: 2,
-        nickname: 'Nickname_2',
-        title: 'Title_2',
-        createdAt: new Date('07 October 2011 15:50 UTC'),
-        updatedAt: new Date('07 October 2011 15:50 UTC'),
-      },
-      {
-        id: 1,
-        nickname: 'Nickname_1',
-        title: 'Title_1',
-        createdAt: new Date('06 October 2011 15:50 UTC'),
-        updatedAt: new Date('06 October 2011 15:50 UTC'),
-      },
-    ];
-  });
+  // test('getItems test', async () => {
+  //   const allItemsReturnValue = [
+  //     {
+  //       id: 2,
+  //       nickname: 'Nickname_2',
+  //       title: 'Title_2',
+  //       createdAt: new Date('07 October 2011 15:50 UTC'),
+  //       updatedAt: new Date('07 October 2011 15:50 UTC'),
+  //     },
+  //     {
+  //       id: 1,
+  //       nickname: 'Nickname_1',
+  //       title: 'Title_1',
+  //       createdAt: new Date('06 October 2011 15:50 UTC'),
+  //       updatedAt: new Date('06 October 2011 15:50 UTC'),
+  //     },
+  //   ];
+  // });
 });
