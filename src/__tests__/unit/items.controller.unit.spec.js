@@ -1,4 +1,4 @@
-import { ItemsController } from '../../../controller/items.controller.js';
+import { ItemsController } from '../../controller/items.controller.js';
 
 let mockItemsService = {
   createItem: jest.fn(),

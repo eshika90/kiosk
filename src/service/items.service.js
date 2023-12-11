@@ -17,7 +17,7 @@ export class ItemsService {
   };
 
   getItemById = id => {
-    if (typeof id === number) {
+    if (typeof id !== 'number') {
       const err = new Error('id는 숫자만 입력 가능합니다.');
       err.statusCode = 400;
       throw err;
