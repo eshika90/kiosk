@@ -8,7 +8,7 @@
     "dev": "nodemon --exec babel-node src/init.js",
     "build": "babel src --out-dir dist --copy-files ",
     "start": "node dist/init.js",
-    "test": "test jest --forceExit",
+    "test": "jest",
     "test:silent": "test jest --silent --forceExit",
     "test:coverage": "test jest --coverage --forceExit",
     "test:unit": "jest __tests__/unit --forceExit",

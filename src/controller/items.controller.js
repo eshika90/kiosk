@@ -12,8 +12,13 @@ export class ItemsController {
   // 특정 메뉴를 id(number)로 조회
   getItemById = (req, res) => {
     const { id } = req.body;
-    const item = this._itemsService.getItemById(id);
-    res.status(200).json({ data: item });
+    try {
+      if (!id) throw new Error('id는 필수로 입력해야 합니다.');
+      const item = this._itemsService.getItemById(id);
+      res.status(200).json({ data: item });
+    } catch (e) {
+      res.status(400).json({ errorMessage: e.message });
+    }   
   };
 
   // type에 속한 메뉴들을 조회(커피: 아메리카노, 라떼, ...etc)
