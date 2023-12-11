@@ -2,6 +2,8 @@ import { ItemsController } from '../../../controller/items.controller.js';
 
 let mockItemsService = {
   createItem: jest.fn(),
+  getItems: jest.fn(),
+  getItemById: jest.fn(),
 };
 
 let mockRequest = {
@@ -36,7 +38,7 @@ describe('ItemsController Unit Test', () => {
     mockRequest.body = createItemRequestBody;
 
     const createItemReturnValue = {
-      id: 1,
+      insertId: undefined,
       name: createItemRequestBody.name,
       price: createItemRequestBody.price,
       type: createItemRequestBody.type,
@@ -44,6 +46,7 @@ describe('ItemsController Unit Test', () => {
       updated_at: new Date().toString(),
     };
 
+    // service의 return 값을 입력한 변수에 할당
     mockItemsService.createItem = jest.fn(() => createItemReturnValue);
 
     // 실행됨
@@ -68,11 +71,16 @@ describe('ItemsController Unit Test', () => {
 
     // 3.
     expect(mockResponse.json).toHaveBeenCalledWith({
-      data: createItemReturnValue,
+      Message: `${createItemReturnValue.id}번으로 메뉴가 생성되었습니다.`,
     });
   });
 
-  test('createItem test : Success', async () => {
+  test('createItem test : Fail', async () => {
+    // 아이템 생성 시 name, price, type 하나라도 없으면 실패
+    const createNothing = {};
+    const createOne = {
+      price: 3500,
+    };
     const createItemErrorName = {
       price: 3500,
       type: 'COFFEE',
@@ -85,24 +93,105 @@ describe('ItemsController Unit Test', () => {
       name: '아메리카노',
       price: '3500',
     };
+    const errorBodies = [
+      createNothing,
+      createOne,
+      createItemErrorName,
+      createItemErrorPrice,
+      createItemErrorType,
+    ];
+    for (const errorBody of errorBodies) {
+      mockRequest.body = errorBody;
+
+      mockResponse.status = jest.fn(() => mockResponse);
+
+      await itemsController.createItem(mockRequest, mockResponse);
+      // res.status는 1번 호출되고, 400번의 http status code가 호출
+      expect(mockResponse.status).toHaveBeenCalledTimes(1);
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      // response의 결과값이 json타입으로 오는지 확인
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        errorMessage: expect.any(String),
+      });
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        errorMessage: 'name, price, type은 필수로 입력해야 합니다.',
+      });
+    }
   });
 
   test('getItems test', async () => {
     const allItemsReturnValue = [
       {
         id: 2,
-        nickname: 'Nickname_2',
-        title: 'Title_2',
+        name: '카페라떼',
+        price: 4000,
+        type: 'COFFEE',
+        amount: 5,
+        option_id: 1,
         createdAt: new Date('07 October 2011 15:50 UTC'),
         updatedAt: new Date('07 October 2011 15:50 UTC'),
       },
       {
-        id: 1,
-        nickname: 'Nickname_1',
-        title: 'Title_1',
-        createdAt: new Date('06 October 2011 15:50 UTC'),
-        updatedAt: new Date('06 October 2011 15:50 UTC'),
+        id: 2,
+        name: '아메리카노',
+        price: 3500,
+        type: 'COFFEE',
+        amount: 2,
+        option_id: 1,
+        createdAt: new Date('07 October 2011 15:50 UTC'),
+        updatedAt: new Date('07 October 2011 15:50 UTC'),
       },
     ];
+    // service 계층에서 getItems Method를 실행했을 때 반환 값을
+    // 위의 변수로 설정
+    mockItemsService.getItems = jest.fn(() => allItemsReturnValue);
+
+    // controller계층에서 getItems를 실행
+    await itemsController.getItems(mockRequest, mockResponse);
+
+    // 해당 메소드의 로직
+    // 1. itemsService의 getItems는 1회 호출
+    // 2. res.status는 1회 호출, 200의 값을 반환
+    // 3. service에서 반환된 값을 res.json Method를 이용해 { data: items} 의 형식으로 반환
+    expect(mockItemsService.getItems).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      data: allItemsReturnValue,
+    });
+  });
+
+  test('getItemById by success', async () => {
+    const itemId = 1;
+    const itemReturnValue = {
+      id: itemId,
+      name: '아메리카노',
+      price: 3500,
+      type: 'COFFEE',
+      amount: 2,
+      option_id: 1,
+      createdAt: new Date('07 October 2011 15:50 UTC'),
+      updatedAt: new Date('07 October 2011 15:50 UTC'),
+    };
+
+    mockRequest.body = { id: itemId };
+    mockItemsService.getItemById = jest.fn(() => itemReturnValue);
+    await itemsController.getItemById(mockRequest, mockResponse);
+
+    // 해당 메소드의 로직
+    // 1. req로 item의 id를 받음
+    // 2. item의 id가 없으면 에러 발생
+    // 3. service의 getItemById는 1회만 호출
+    // 4. res.status는 1회만 호출
+    // 5. res.status는 성공 시 200번 리턴
+    // 6. res.status는 실패 시 400번 리턴
+    // 7. res.status는 실패 시 json타입으로 errorMessage ... 으로 리턴
+    // 8. res.status는 성공 시 json타입으로 Message; id번으로 리턴
+    expect(mockItemsService.getItemById).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      data: itemReturnValue,
+    });
   });
 });

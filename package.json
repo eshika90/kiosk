@@ -8,11 +8,11 @@
     "dev": "nodemon --exec babel-node src/init.js",
     "build": "babel src --out-dir dist --copy-files ",
     "start": "node dist/init.js",
-    "test": "NODE_ENV=test jest --forceExit",
-    "test:silent": "NODE_ENV=test jest --silent --forceExit",
-    "test:coverage": "NODE_ENV=test jest --coverage --forceExit",
+    "test": "jest",
+    "test:silent": "test jest --silent --forceExit",
+    "test:coverage": "test jest --coverage --forceExit",
     "test:unit": "jest __tests__/unit --forceExit",
-    "test:integration": "NODE_ENV=test jest __tests__/integration --forceExit"
+    "test:integration": "test jest __tests__/integration --forceExit"
   },
   "keywords": [],
   "author": "",
