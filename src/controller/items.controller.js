@@ -24,8 +24,14 @@ export class ItemsController {
   // type에 속한 메뉴들을 조회(커피: 아메리카노, 라떼, ...etc)
   getTypeItems = (req, res) => {
     const { type } = req.body;
-    const findByTypeItems = this._itemsService.getTypeItems(type);
-    res.stauts(200).json({ data: findByTypeItems });
+    try {
+      if (!type) throw new Error('type은 필수로 입력해야 합니다.');
+      const findByTypeItems = this._itemsService.getTypeItems(type);
+      res.status(200).json({ data: findByTypeItems });
+    } catch (e) {
+      res.status(400).json({ errorMessage: e.message });
+    }   
+    
   };
 
   // 메뉴 작성(관리자만 가능하게 해야함)

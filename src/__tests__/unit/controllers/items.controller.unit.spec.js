@@ -4,6 +4,9 @@ let mockItemsService = {
   createItem: jest.fn(),
   getItems: jest.fn(),
   getItemById: jest.fn(),
+  getTypeItems: jest.fn(),
+  updateItem: jest.fn(),
+  deleteItem: jest.fn(),
 };
 
 let mockRequest = {
@@ -106,6 +109,7 @@ describe('ItemsController Unit Test', () => {
       mockResponse.status = jest.fn(() => mockResponse);
 
       await itemsController.createItem(mockRequest, mockResponse);
+      // service의 createItem은 호출되지 않음.
       // res.status는 1번 호출되고, 400번의 http status code가 호출
       expect(mockResponse.status).toHaveBeenCalledTimes(1);
       expect(mockResponse.status).toHaveBeenCalledWith(400);
@@ -180,18 +184,160 @@ describe('ItemsController Unit Test', () => {
 
     // 해당 메소드의 로직
     // 1. req로 item의 id를 받음
-    // 2. item의 id가 없으면 에러 발생
-    // 3. service의 getItemById는 1회만 호출
-    // 4. res.status는 1회만 호출
-    // 5. res.status는 성공 시 200번 리턴
-    // 6. res.status는 실패 시 400번 리턴
-    // 7. res.status는 실패 시 json타입으로 errorMessage ... 으로 리턴
-    // 8. res.status는 성공 시 json타입으로 Message; id번으로 리턴
+    // 2. service의 getItemById는 1회만 호출
+    // 3. res.status는 1회만 호출
+    // 4. res.status는 200번 리턴
+    // 5. res.status는 성공 시 json타입으로 Message; id번으로 리턴
     expect(mockItemsService.getItemById).toHaveBeenCalledTimes(1);
     expect(mockResponse.status).toHaveBeenCalledTimes(1);
     expect(mockResponse.status).toHaveBeenCalledWith(200);
     expect(mockResponse.json).toHaveBeenCalledWith({
       data: itemReturnValue,
+    });
+  });
+
+  test('getItemById by Invalid Params Error', async () => {
+    mockRequest.body = {};
+    await itemsController.getItemById(mockRequest, mockResponse);
+
+    // 해당 메소드의 로직
+    // 1. req로 item의 빈 객체를 받음
+    // 2. service의 getItemById는 호출되지 않음
+    // 3. res.status는 400번 리턴
+    // 4. res.status는 json타입으로 errorMessage ... 으로 리턴
+    expect(mockItemsService.getItemById).toHaveBeenCalledTimes(0);
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(400);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      errorMessage: 'id는 필수로 입력해야 합니다.',
+    });
+  });
+
+  test('getItemByType by success', async () => {
+    const itemReturnValue = [
+      {
+        id: 1,
+        name: '아메리카노',
+        price: 3500,
+        type: 'COFFEE',
+        amount: 2,
+        option_id: 1,
+        createdAt: new Date('07 October 2011 15:50 UTC'),
+        updatedAt: new Date('07 October 2011 15:50 UTC'),
+      },
+      {
+        id: 2,
+        name: '카페라떼',
+        price: 4000,
+        type: 'COFFEE',
+        amount: 3,
+        option_id: 1,
+        createdAt: new Date('07 October 2011 15:50 UTC'),
+        updatedAt: new Date('07 October 2011 15:50 UTC'),
+      },
+    ];
+
+    mockRequest.body = { type: 'COFFEE' };
+    mockItemsService.getTypeItems = jest.fn(() => itemReturnValue);
+    await itemsController.getTypeItems(mockRequest, mockResponse);
+    expect(mockItemsService.getTypeItems).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(200);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      data: itemReturnValue,
+    });
+  });
+
+  test('getItemByType by Invalid Params Error', async () => {
+    mockRequest.body = {};
+    await itemsController.getTypeItems(mockRequest, mockResponse);
+
+    expect(mockItemsService.getTypeItems).toHaveBeenCalledTimes(0);
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(400);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      errorMessage: 'type은 필수로 입력해야 합니다.',
+    });
+  });
+
+  test('updateItem by Success', async () => {
+    const updateItemRequestBody = {
+      name: '아메리카노',
+      price: 3500,
+      type: 'COFFEE',
+    };
+
+    mockRequest.body = updateItemRequestBody;
+    await itemsController.updateItem(mockRequest, mockResponse);
+
+    expect(mockItemsService.updateItem).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(201);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      message: '수정이 완료되었습니다.',
+    });
+  });
+
+  test('updateItem by Invalid Params Error', async () => {
+    const updateNothing = {};
+    const updateOne = {
+      price: 3500,
+    };
+    const updateItemErrorName = {
+      price: 3500,
+      type: 'COFFEE',
+    };
+    const updateItemErrorPrice = {
+      name: '아메리카노',
+      type: 'COFFEE',
+    };
+    const updateItemErrorType = {
+      name: '아메리카노',
+      price: '3500',
+    };
+
+    const errorBodies = [
+      updateNothing,
+      updateOne,
+      updateItemErrorName,
+      updateItemErrorPrice,
+      updateItemErrorType,
+    ];
+
+    for (const errorBody of errorBodies) {
+      mockRequest.body = errorBody;
+      mockResponse.status = jest.fn(() => mockResponse);
+      await itemsController.updateItem(mockRequest, mockResponse);
+      expect(mockItemsService.updateItem).toHaveBeenCalledTimes(0);
+      expect(mockResponse.status).toHaveBeenCalledTimes(1);
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        errorMessage: 'name, price, type은 필수로 입력해야 합니다.',
+      });
+    }
+  });
+
+  test('deleteItem by Success', async () => {
+    mockRequest.body = { name: '아메리카노' };
+    await itemsController.deleteItem(mockRequest, mockResponse);
+
+    expect(mockItemsService.deleteItem).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(201);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      message: '삭제가 완료되었습니다.',
+    });
+  });
+
+  test('deleteItem by Invalid Params Error', async () => {
+    mockRequest.body = {};
+    await itemsController.deleteItem(mockRequest, mockResponse);
+
+    expect(mockItemsService.deleteItem).toHaveBeenCalledTimes(0);
+    expect(mockResponse.status).toHaveBeenCalledTimes(1);
+    expect(mockResponse.status).toHaveBeenCalledWith(400);
+    expect(mockResponse.json).toHaveBeenCalledWith({
+      errorMessage: 'name은 필수로 입력해야 합니다.',
     });
   });
 });
