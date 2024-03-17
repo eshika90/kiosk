@@ -1,6 +1,5 @@
 {
   "name": "kiosk_project",
-  "type": "module",
   "version": "1.0.0",
   "description": "카페 키오스크 만들기",
   "main": "src/app.js",
