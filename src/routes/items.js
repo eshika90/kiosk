@@ -4,11 +4,9 @@ import { ItemsController } from '../controller/items.controller.js';
 const router = Router();
 const itemsController = new ItemsController();
 
-router.get('/', itemsController.getItems);
-router.get('/:id', itemsController.getItemById);
-router.get('/types', itemsController.getTypeItems);
+router.get('/types/:type', itemsController.getItems);
 router.post('/', itemsController.createItem);
-router.put('/', itemsController.updateItem);
-router.delete('/', itemsController.deleteItem);
+router.put('/:name', itemsController.updateItem);
+router.delete('/:name', itemsController.deleteItem);
 
 export default router;
