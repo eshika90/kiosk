@@ -36,7 +36,8 @@ export class ItemsRepository {
     return findByTypeItems;
   };
 
-  createItem = async (name, price, type) => {
+  createItem = async item => {
+    const { name, price, type } = item;
     const [createdItem] = await this.connection.execute(
       'INSERT INTO item (name, price, type) VALUES (?, ?, ?)',
       [name, price, type],
