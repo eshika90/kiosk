@@ -1,89 +1,107 @@
 import { ItemsRepository } from '../repository/items.repository.js';
+import { Messages } from '../error/messages.js';
+import itemType from '../constants/itemType.js';
+import { ValidationCheck } from '../utils/validationCheck.js';
 
 export class ItemsService {
-  constructor() {
-    const typesOfCafeItem = {
-      1: 'COFFEE',
-      2: 'SMOOTHIE',
-      3: 'ADE',
-      4: 'SWEETS',
-    };
-    Object.freeze(typesOfCafeItem);
-  }
   _itemsRepository = new ItemsRepository();
 
-  getItems = () => {
-    return this._itemsRepository.getItems();
+  getItems = async type => {
+    if (!ValidationCheck(itemType, type) && type !== 'all') {
+      return {
+        code: 400,
+        message: Messages.WrongType,
+      };
+    }
+    return {
+      code: 200,
+      data: await this._itemsRepository.getItems(type),
+    };
   };
 
-  getItemById = id => {
-    if (typeof id !== 'number') {
-      const err = new Error('id는 숫자만 입력 가능합니다.');
-      err.statusCode = 400;
-      throw err;
+  createItem = async item => {
+    if (!item.name || typeof item.name !== 'string') {
+      return {
+        code: 400,
+        message: Messages.WrongName,
+      };
     }
-    return this._itemsRepository.getItemById(id);
-  };
-
-  getTypeItems = type => {
-    if (!typesOfCafeItem[type]) {
-      const err = new Error(
-        '종류는 COFFEE, SMOOTHIE, ADE, SWEETS중 하나만 선택 가능합니다.',
-      );
-      err.statusCode = 400;
-      throw err;
+    if (!item.price || typeof item.price < 0) {
+      return {
+        code: 400,
+        message: Messages.WrongPrice,
+      };
     }
-    return this._itemsRepository.getTypeItems(type);
-  };
-
-  createItem = async (name, price, type) => {
-    if (
-      typeof name !== 'string' ||
-      typeof price !== 'number' ||
-      typeof type !== 'string'
-    ) {
-      throw new Error('name, type은 문자, price는 숫자여야 합니다. ');
+    if (!item.type || !ValidationCheck(itemType, item.type)) {
+      return {
+        code: 400,
+        message: Messages.WrongType,
+      };
     }
-    if (
-      type !== 'COFFEE' &&
-      type !== 'SMOOTHIE' &&
-      type !== 'ADE' &&
-      type !== 'SWEETS'
-    ) {
-      throw new Error(
-        'type은 COFFEE, SMOOTHIE, ADE, SWEETS 중 하나만 선택 가능합니다.',
-      );
-    }
-    const existingItemName = await this._itemsRepository.getItemByName(name);
+    const existingItemName = await this._itemsRepository.getItemByName(
+      item.name,
+    );
     if (existingItemName.length !== 0) {
-      throw new Error('이미 존재하는 메뉴입니다.');
+      return {
+        code: 400,
+        message: Messages.ExistName,
+      };
     }
-    return await this._itemsRepository.createItem(name, price, type);
+    const result = await this._itemsRepository.createItem(item);
+    return {
+      code: 200,
+      message: `${result.insertId}번으로 메뉴가 생성되었습니다.`,
+    };
   };
 
-  updateItem = async (name, price, type) => {
-    if (
-      typeof name !== 'string' ||
-      typeof price !== 'number' ||
-      typeof type !== 'string'
-    ) {
-      throw new Error('name, type은 문자, price는 숫자여야 합니다. ');
+  updateItem = async item => {
+    if (!ValidationCheck(itemType, item.type)) {
+      return {
+        code: 400,
+        message: Messages.WrongType,
+      };
     }
-    if (
-      type !== 'COFFEE' &&
-      type !== 'SMOOTHIE' &&
-      type !== 'ADE' &&
-      type !== 'SWEETS'
-    ) {
-      throw new Error(
-        'type은 COFFEE, SMOOTHIE, ADE, SWEETS 중 하나만 선택 가능합니다.',
-      );
+    if (!item.price || item.price < 0) {
+      return {
+        code: 400,
+        message: Messages.WrongPrice,
+      };
     }
-    return await this._itemsRepository.updateItem(name, price, type);
+    if (!item.type || !ValidationCheck(itemType, item.type)) {
+      return {
+        code: 400,
+        message: Messages.WrongType,
+      };
+    }
+    const [result] = await this._itemsRepository.updateItem(item);
+    console.log(result);
+    if (result.affectedRows === 0) {
+      return {
+        code: 400,
+        message: Messages.NoneExist,
+      };
+    }
+    return {
+      code: 200,
+    };
   };
 
   deleteItem = async name => {
-    if (typeof name !== 'string') throw new Error('name은 문자여야 합니다.');
-    return await this._itemsRepository.deleteItem(name);
+    if (typeof name !== 'string') {
+      return {
+        code: 400,
+        message: Messages.WrongName,
+      };
+    }
+    const result = await this._itemsRepository.deleteItem(name);
+    if (result.affectedRows === 0) {
+      return {
+        code: 404,
+        message: Messages.NoneExist,
+      };
+    }
+    return {
+      code: 200,
+    };
   };
 }

@@ -12,6 +12,29 @@ let mockItemsRepository = {
 let itemsService = new ItemsService();
 itemsService._itemsRepository = mockItemsRepository;
 
+const itemReturnValue = [
+  {
+    id: 1,
+    name: '아메리카노',
+    price: 3500,
+    type: 'COFFEE',
+    amount: 2,
+    option_id: 1,
+    createdAt: new Date('07 October 2011 15:50 UTC'),
+    updatedAt: new Date('07 October 2011 15:50 UTC'),
+  },
+  {
+    id: 2,
+    name: '카페라떼',
+    price: 4000,
+    type: 'COFFEE',
+    amount: 2,
+    option_id: 1,
+    createdAt: new Date('07 October 2011 15:50 UTC'),
+    updatedAt: new Date('07 October 2011 15:50 UTC'),
+  },
+];
+
 describe('Layered Architecture Pattern Items Service Unit Test', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -80,5 +103,14 @@ describe('Layered Architecture Pattern Items Service Unit Test', () => {
       expect(e.statusCode).toBe(400);
       expect(mockItemsRepository.getItemById).toHaveBeenCalledTimes(0);
     }
+  });
+
+  test('getTypeItems by Success', () => {
+    const type = 'COFFEE';
+    mockItemsRepository.getTypeItems = jest.fn(() => {
+      return itemReturnValue;
+    });
+    itemsService.getTypeItems(type);
+    expect(mockItemsRepository.getTypeItems).toHaveBeenCalledTimes(1);
   });
 });

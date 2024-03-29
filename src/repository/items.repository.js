@@ -12,48 +12,50 @@ export class ItemsRepository {
     return allItems;
   };
 
-  getItemById = id => {
-    const [findByIdItem] = this.connection.execute(
+  getItemById = async id => {
+    const [row] = await this.connection.execute(
       'SELECT * FROM item WHERE id = ?',
       [id],
     );
-    return findByIdItem;
+    return row[0];
   };
 
   getItemByName = async name => {
-    const [findByNameItem] = await this.connection.execute(
-      'SELECT * FROM item WHERE name = ?',
+    const findByNameItem = await this.connection.execute(
+      'SELECT * FROM `item` WHERE name = ?',
       [name],
     );
     return findByNameItem;
   };
 
-  getTypeItems = async type => {
-    const [findByTypeItems] = await this.connection.execute(
-      'SELECT * FROM item WHERE `type` = ?',
-      [type],
-    );
-    return findByTypeItems;
+  getItems = async type => {
+    if (type === 'all') {
+      const [result] = await this.connection.execute('SELECT * FROM item');
+      return result;
+    } else {
+      const [findByTypeItems] = await this.connection.execute(
+        'SELECT * FROM item WHERE `type` = ?',
+        [type],
+      );
+      return findByTypeItems;
+    }
   };
 
-  createItem = async (name, price, type) => {
+  createItem = async item => {
+    const { name, price, type } = item;
     const [createdItem] = await this.connection.execute(
-      'INSERT INTO item (name, price, type) VALUES (?, ?, ?)',
+      'INSERT INTO item (name, price, type, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())',
       [name, price, type],
     );
     return createdItem;
   };
 
-  updateItem = async (name, price, type) => {
-    const [updatedItem] = await this.connection.execute(
+  updateItem = async item => {
+    const { name, modifiedName, price, type } = item;
+    return await this.connection.execute(
       'UPDATE item SET name = ?, price = ?, type = ? WHERE name = ?',
-      [name, price, type, name],
+      [modifiedName, price, type, name],
     );
-    if (updatedItem.affectedRows === 0) {
-      throw new Error('찾을 수 없는 메뉴입니다.');
-    } else {
-      return true;
-    }
   };
 
   deleteItem = async name => {
@@ -61,10 +63,6 @@ export class ItemsRepository {
       'DELETE FROM item WHERE name = ?',
       [name],
     );
-    if (deletedItem.affectedRows === 0) {
-      throw new Error('찾을 수 없는 메뉴입니다.');
-    } else {
-      return true;
-    }
+    return deletedItem;
   };
 }
