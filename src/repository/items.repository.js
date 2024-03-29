@@ -21,11 +21,11 @@ export class ItemsRepository {
   };
 
   getItemByName = async name => {
-    const findByNameItem = await this.connection.execute(
-      'SELECT * FROM `item` WHERE name = ?',
+    const [result] = await this.connection.execute(
+      'SELECT * FROM item WHERE name = ?',
       [name],
     );
-    return findByNameItem;
+    return result[0];
   };
 
   getItems = async type => {

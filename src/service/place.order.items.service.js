@@ -8,8 +8,8 @@ export class PlaceOrderItemsService {
   _placeOrderItemsRepository = new PlaceOrderItemsRepository();
   _itemRepo = new ItemsRepository();
 
-  create = async (id, amount) => {
-    if (!id) {
+  create = async (name, amount) => {
+    if (!name) {
       return {
         code: 400,
         message: Messages.WrongName,
@@ -21,7 +21,8 @@ export class PlaceOrderItemsService {
         message: Messages.WrongAmount,
       };
     }
-    const findItem = await this._itemRepo.getItemById(id);
+    const findItem = await this._itemRepo.getItemByName(name);
+    console.log(findItem);
     if (!findItem) {
       return {
         code: 400,

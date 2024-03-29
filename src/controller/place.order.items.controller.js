@@ -14,9 +14,9 @@ export class PlaceOrderItemsController {
   // 발주서 만들기
   create = async (req, res) => {
     try {
-      const { itemId, amount } = req.body;
+      const { itemName, amount } = req.body;
       const { code, data, message } = await this._placeOrderItemsService.create(
-        itemId,
+        itemName,
         amount,
       );
       res

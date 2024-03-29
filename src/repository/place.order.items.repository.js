@@ -1,5 +1,4 @@
 import { DatabaseConnection } from '../db.js';
-import orderItemState from '../constants/orderItemState.js';
 
 export class PlaceOrderItemsRepository {
   connection;
