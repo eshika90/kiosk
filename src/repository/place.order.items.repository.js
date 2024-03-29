@@ -1,4 +1,5 @@
 import { DatabaseConnection } from '../db.js';
+import orderItemState from '../constants/orderItemState.js';
 
 export class PlaceOrderItemsRepository {
   connection;
@@ -7,18 +8,26 @@ export class PlaceOrderItemsRepository {
     this.connection = new DatabaseConnection().getConnection();
   }
 
-  create = async (itemName, amount) => {
-    const findByidName = await this.connection.execute(
-      'SELECT * FROM item WHERE name = ?',
-      [itemName],
+  create = async (itemId, amount, state) => {
+    const [createdReceipt] = await this.connection.execute(
+      'INSERT INTO place_order_item (item_id, amount, state, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())',
+      [itemId, amount, state],
     );
-    if (!findByidName.length) throw new Error('존재하지 않는 메뉴입니다.');
-    else {
-      const itemId = findByidName[0][0].id;
-      return this.connection.execute(
-        'INSERT INTO place_order_item (item_id, amount, state, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())',
-        [itemId, amount, 0],
-      );
-    }
+    return createdReceipt;
+  };
+
+  findReceipt = async id => {
+    const [orderReceipt] = await this.connection.execute(
+      'SELECT * FROM place_order_item where (id) VALUES (?)',
+      [id],
+    );
+    return orderReceipt;
+  };
+
+  updateState = async (id, state) => {
+    return await this.connection.execute(
+      'UPDATE place_order_item set state = ? WHERE id = ?',
+      [state, id],
+    );
   };
 }

@@ -1,4 +1,5 @@
 import { PlaceOrderItemsService } from '../service/place.order.items.service';
+import { Messages } from '../error/messages.js';
 
 export class PlaceOrderItemsController {
   _placeOrderItemsService = new PlaceOrderItemsService();
@@ -13,20 +14,35 @@ export class PlaceOrderItemsController {
   // 발주서 만들기
   create = async (req, res) => {
     try {
-      const { itemName, amount } = req.body;
-      if (!itemName || !amount)
-        throw new Error('메뉴의 이름과 수량은 필수 값입니다.');
-      const placeOrderSuccess = await this._placeOrderItemsService.create(
-        itemName,
+      const { itemId, amount } = req.body;
+      const { code, data, message } = await this._placeOrderItemsService.create(
+        itemId,
         amount,
       );
-      const orderId = placeOrderSuccess[0].insertId;
-      res.status(200).json({
-        message: `발주번호${orderId}로 ${itemName}이 ${amount}개 발주신청 되었습니다.`,
-      });
+      res
+        .status(code)
+        .json({ ...(data && { data }), ...(message && { message }) });
     } catch (e) {
       console.log(e);
       res.status(500).json({ errorMessage: e.message });
+    }
+  };
+
+  // 주문 수정은 취소, 완료 두 가지 선택만 받을 수 있다.
+  // 주문을 수정하려면 주문 id를 받아와야한다.(생성된 pk)
+  update = async (req, res) => {
+    try {
+      const { orderId, state } = req.body;
+      const { code, data, message } = await this._placeOrderItemsService.create(
+        orderId,
+        state,
+      );
+      res
+        .status(code)
+        .json({ ...(data && { data }), ...(message && { message }) });
+    } catch (e) {
+      console.log(e);
+      res.status(500).json({ errorMessage: Messages.ServerError });
     }
   };
 }

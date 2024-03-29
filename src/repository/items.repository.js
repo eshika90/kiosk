@@ -12,17 +12,17 @@ export class ItemsRepository {
     return allItems;
   };
 
-  getItemById = id => {
-    const [findByIdItem] = this.connection.execute(
+  getItemById = async id => {
+    const [row] = await this.connection.execute(
       'SELECT * FROM item WHERE id = ?',
       [id],
     );
-    return findByIdItem;
+    return row[0];
   };
 
   getItemByName = async name => {
-    const [findByNameItem] = await this.connection.execute(
-      'SELECT * FROM item WHERE name = ?',
+    const findByNameItem = await this.connection.execute(
+      'SELECT * FROM `item` WHERE name = ?',
       [name],
     );
     return findByNameItem;

@@ -5,5 +5,6 @@ const router = Router();
 const placeOrderItemsController = new PlaceOrderItemsController();
 
 router.post('/', placeOrderItemsController.create);
+router.put('/', placeOrderItemsController.update);
 
 export default router;
