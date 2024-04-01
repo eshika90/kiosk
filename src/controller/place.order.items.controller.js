@@ -33,7 +33,8 @@ export class PlaceOrderItemsController {
   update = async (req, res) => {
     try {
       const { orderId, state } = req.body;
-      const { code, data, message } = await this._placeOrderItemsService.create(
+      console.log(state);
+      const { code, data, message } = await this._placeOrderItemsService.update(
         orderId,
         state,
       );

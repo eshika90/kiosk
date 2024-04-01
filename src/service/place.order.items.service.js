@@ -22,7 +22,6 @@ export class PlaceOrderItemsService {
       };
     }
     const findItem = await this._itemRepo.getItemByName(name);
-    console.log(findItem);
     if (!findItem) {
       return {
         code: 400,
@@ -43,6 +42,7 @@ export class PlaceOrderItemsService {
   // 1. 발주한 물품이 와서 완료된 경우
   // 2. 발주한 물품을 취소하는 경우
   update = async (orderId, state) => {
+    console.log('service실행');
     if (!ValidationCheck(orderItemState, state)) {
       return {
         code: 400,
@@ -88,18 +88,23 @@ export class PlaceOrderItemsService {
         message: Messages.CannotChangeState,
       };
     }
-
     // 주문이 완료되는 경우
     if (
       state === orderItemState.complete &&
       orderReceipt.state === orderItemState.ordered
     ) {
-      await this._itemRepo.updateItemAmount(
-        orderReceipt.itemId,
-        orderReceipt.amount,
-      );
-      await this._placeOrderItemsRepository.updateState(orderId, state);
-      // 트랜잭션 적용할 예정
+      const { item_id, amount } = orderReceipt;
+      const result = await this._placeOrderItemsRepository.updateState({
+        orderId,
+        state,
+        item_id,
+        amount,
+      });
+      if (!result) {
+        return {
+          code: 400,
+        };
+      }
       return {
         code: 200,
       };
@@ -110,7 +115,13 @@ export class PlaceOrderItemsService {
       state === orderItemState.cancel &&
       orderReceipt.state === orderItemState.ordered
     ) {
-      await this._placeOrderItemsRepository.updateState(orderId, state);
+      await this._placeOrderItemsRepository.updateState({
+        orderId,
+        state,
+      });
+      return {
+        code: 200,
+      };
     }
   };
 }
