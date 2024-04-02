@@ -9,6 +9,7 @@ export class Server {
   expressApp = new ExpressApp();
   httpServer; // javascript에서는 안 써도 되지만 선언을 typescript에서 미리 해놓고 사용하기 때문에 조호영튜터님은 선언을 하는것을 선호함
   databaseConnection = new DatabaseConnection();
+
   constructor() {
     this.httpServer = new Http.Server(this.expressApp.app); // app을 http서버로 실행시킴
   }

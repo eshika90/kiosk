@@ -2,6 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import routes from './routes/index.js';
 
+
 export class ExpressApp {
   app = express(); // express() 라고 실행해주어도 되지만 app이라고 명시를 해줌
 
@@ -22,10 +23,6 @@ export class ExpressApp {
         success: false,
         error: error.message,
       });
-    });
-
-    this.app.use('/ping', (req, res, next) => {
-      return res.status(200).json({ message: 'pong' });
     });
   };
 }
